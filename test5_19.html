@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test5_19</title>
+</head>
+<body>
+    <script Language = "JavaScript">
+        function person(name,sex){
+            this.name = name;
+            this.sex = sex;
+            this.say = function(){
+                return "大家好！我的名字是"+this.name+"。";
+            }
+        }
+        //创建对象
+        var zhangsan = new person("张三","男");
+        zhangsan.say();
+        zhangsan.tel = "1823-8888888";
+        zhangsan.run = function(){
+            return "我跑的很快。";
+        }
+        alert("性名:"+zhangsan.name);
+        alert("性别:"+zhangsan.sex);
+        alert(zhangsan.say())
+        atert("电话"+zhangsan.tel);
+        alert(zhangsan.run())
+    </script>
+</body>
+</html>
