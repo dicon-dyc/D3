@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js"></script>
+    <style>
+        rect {
+            fill-opacity: 0.7; /* 透明度 */
+            rx: 10; /* rx ry 设置圆角 */
+            ry: 20;
+            fill: #FF9900; /* 添加填充色*/
+            x: 0; /* 设置起始坐标，x是水平，(x, y) 对应矩形的左上角 */
+            height: 25px;
+        }
+    </style>
+
+</head>
+<body>
+<svg id="main-svg" width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+</svg>
+
+<script>
+    'use strict'; /* 严格检查模式 */
+    d3.json('data.json').then(function (result) {
+        console.log(result)
+        /* 处理完数据，开始添加元素 */
+        d3.select('#main-svg')
+            .selectAll('rect')
+            .data(result)
+            .enter()
+            .append('rect')
+            .attr('width', item => item.sales)
+            .attr('y', (item, index) => index * 30);
+        /* 进阶 渐变色 鼠标触摸*/
+        d3.selectAll('rect')
+            .on("mouseover", function (item, index) {
+                d3.select(this)
+                    .style("fill", "#ffb6b9");
+            })
+            .on("mouseout", function (item, index) {
+                d3.select(this)
+                    .transition()
+                    .duration(500) /* 设置或获取过渡时间，value可以为函数。 */
+                    .style("fill", "#FF9900");
+            });
+    }).catch(error => {
+        console.log(error)
+    })
+</script>
+</body>
+</html>

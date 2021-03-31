@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>d3绘制饼状图</title>
+    </head>
+    <body>
+        <div id="container"></div>
+        <script type="text/javascript" src="http://d3js.org/d3.v4.js" charset="utf-8"></script>
+        <script type="text/javascript">
+            
+            d3.csv('./shiyan1.csv',type,function(data1){
+                // 定义饼状图数据 回调函数返回的data
+                var data = data1
+
+                 //定义容器的宽高
+                var width = 500
+                var height = 500
+                
+                var svg = d3.select('#container')// 容器元素选择
+                    .append('svg')   //并向其内添加一个svg元素
+                    .attr('width',width) //设置宽高
+                    .attr('height',height)
+                    
+                var g = svg.append('g') //向svg元素中添加一个g 元素
+                        .attr('transform','translate(200,300)') //定义偏移量，也就是圆中心点的位置
+                        
+                // 定义饼状图
+                var arc = d3.arc()
+                        .innerRadius(0) //圆环起始半径
+                        .outerRadius(200) //圆环结束半径
+                       // .startAngle(0)  //圆环起始角度 - 注释
+                       // .endAngle(360 * Math.PI/180)  //圆环的结束角度-极坐标 -注释
+                        
+                // 设置动态数据填充
+                var arc_data= d3.pie()
+                        .value(function(d){return d.sales})
+                
+                // 定义颜色
+                var color = d3.scaleOrdinal(d3.schemeCategory10)
+                
+                // 定义填充路径
+                g.selectAll('path')
+                    .data(arc_data(data))  //数据填充
+                    .enter() 
+                    .append('path')
+                    .attr('d',arc)
+                    .style('fill',function(d,i){ return color(i)}) //为每个扇形填充不同颜色
+                    
+                // 添加文字
+                g.selectAll('text')
+                    .data(arc_data(data))
+                    .enter()
+                    .append('text')
+                    .text(function(d){ return d.data.sales}) //填充不同文字内容
+                    .attr('transform',function(d){ return 'translate('+arc.centroid(d)+')'}) //设置文字偏移
+                    .attr('text-anchor','middle') //设置文字位置区域为，扇形区域内
+                        
+            })
+            
+            // year数据类型转换: String ->  Number
+            function type(d){
+                d.sales = +d.sales
+                return d
+            }
+        </script>
+    </body>
+</html>

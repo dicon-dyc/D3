@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test5_23</title>
+</head>
+<body>
+    <canvas id = "myCanvas" height="1000" width="1000">
+        fuck
+    </canvas>
+    <script type="text/javascript">
+    function drawline(){
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        var dx = 150;
+        var dy = 150;
+        var s = 100;
+        ctx.beginPath();
+        var x = Math.sin(0);
+        var y = Math.cos(0);
+        var dig = Math.PI/15*11;
+        for(var i = 0;i<30;i++){
+            var x = Math.sin(i*dig);
+            var y = Math.cos(i*dig)
+            ctx.lineTo(dx+x*s,dy+y*s);
+        }
+        ctx.closePath;
+        ctx.stroke;
+    }
+    windows.addEventListener("load",drawline,true);
+    </script>
+</body>
+</html>

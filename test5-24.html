@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test5-24</title>
+</head>
+<body>
+    <canvas id="myCanvas" height = 500 width=500></canvas>
+    <script type = "text/JavaScript">
+    function drawRect()
+    {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(20,20,100,50);
+        ctx.stroke();
+        ctx.fillRect(0,0,150,150);
+    }
+    window.addEventListener("load",drawRect,true);
+    </script>
+</body>
+</html>

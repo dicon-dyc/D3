@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shiyan2_2</title>
+</head>
+<body>
+    <script src = "http://d3js.org/d3.v6.min.js"charset = "utf-8"></script>
+    <script>
+        var width = 1000;
+        var height = 1000;
+        var dataset = [];
+        var xmark = [];
+        d3.csv("shiyan1.csv",function(csv){
+           
+                dataset.push(parseFloat(csv.sales));
+                xmark.push(csv.province);
+            
+        }).then(data=>{
+            console.log(dataset)
+        var svg = d3.select("boby")
+                    .append("svg")
+                    .attr("width",width)
+                    .attr("height",height)
+        var pie = d3.pie();
+        var piedata = pie(dataset);
+        console.log(piedata)
+        var outerRadius = 150;
+        var innerRadius = 0;
+        var arc = d3.arc()
+                    .innerRadius(innerRadius)
+                    .outerRadius(outerRadius)
+        var color = d3.scaleOrdinal(d3.schemeCategory10)
+        var arcs = svg.selectAll("g")
+                      .data(piedata)
+                      .enter()
+                      .append("g")
+                      .attr("transform","translate("+(width/2)+ "," +(width/2)+")");
+        arcs.append("path")
+            .attr("fill",(d,i)=>color(i))
+            .attr("d",d=>arc(d));
+        arcs.append("text")
+            .attr("tranform",d=>"translate("+arc.centroid(d)+")")
+            .attr("text-anchor","middle")
+            .text(d=>d.data);
+        /*var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width")
+                    .attr("height")*/
+        })
+
+    </script>
+</body>
+</html>

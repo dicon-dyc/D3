@@ -1,0 +1,46 @@
+[
+    {
+    "province":"上海",
+    "value":97
+},
+{
+    "province":"云南",
+    "value":266
+},
+{
+    "province":"内蒙古",
+    "value":56
+},
+{
+    "province":"北京",
+    "value":200
+},
+{
+    "province":"四川",
+    "value":410
+},
+{
+    "province":"安徽",
+    "value":15
+},
+{
+    "province":"山东",
+    "value":303
+},
+{
+    "province":"山西",
+    "value":36
+},
+{
+    "province":"广西",
+    "value":250
+},
+{
+    "province":"江苏",
+    "value":676
+},
+{
+    "province":"江西",
+    "value":53
+}
+]
