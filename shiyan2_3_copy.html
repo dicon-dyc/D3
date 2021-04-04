@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <script>
+        let width = 960;
+        let height = 700;
+        let margin = {
+            top: 20,
+            right: 50,
+            bottom: 70,
+            left: 50
+        };
+        let svg = d3.select("body").append("svg").style('background', '#f1c4cd')
+            .attr("width",width)
+            .attr("height",height)
+        d3.json("shiyan1.json")
+            .then(function (result){
+                let x = d3.scaleBand()
+                    .domain(d3.map(result,item => item.province))
+                    .range([margin.left,width-margin.right])
+                    console.log(result)
+
+
+                let y =d3.scaleLinear()
+                    .domain([0,d3.max(d3.map(result,item => +item.value))])
+                    .range([height-margin.bottom,margin.top])
+
+                let xAxis = d3.axisBottom()
+                    .scale(x)
+                    .ticks(12)
+                    .tickSizeOuter(0)
+                    .tickSizeInner(10)
+
+                let yAxis = d3.axisLeft()
+                    .scale(y)
+                    .ticks(12)
+                    .tickSizeOuter(0)
+                    .tickSizeInner(10)
+
+
+                svg.append('g')
+                    .attr('transform', `translate(${0}, ${height - margin.bottom})`)
+                    .call(xAxis)
+
+                svg.append('g')
+                    .attr('transform', `translate(${margin.left},${0})`)
+                    .call(yAxis)
+
+                svg.selectAll("g").select('text')
+                    .attr('font-size','15px')
+
+                let line1 = d3.line()
+                    .x(function (d){
+                        return x(d.province)
+                    })
+                    .y(function (d){
+                        return y(d.value)
+                    }).curve(d3.curveLinear);
+
+                // function color(){
+                //     return d3.hsl(Math.random()*360,0.75,0.75);
+                // }
+                let color = d3.scaleOrdinal(d3.schemeCategory10);//d3.schemeCategory10
+
+                for (let i=1;i<11;i++){
+                    let flog = [];
+                    flog.push(result[i-1])
+                    flog.push(result[i])
+                    svg.append('path')
+                        .attr('stroke', '#eb3c70')
+                        .attr('stroke-width', 3)
+                        .attr('d', line1(flog))
+                        .attr('fill', 'none')
+                        .attr('transform', `translate(${40},${0})`);
+                    console.log("result[i-1]",flog);
+                }
+                //console.log("result:",result);
+        });
+
+
+    </script>
+</body>
+</html>
