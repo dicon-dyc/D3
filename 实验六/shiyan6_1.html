@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="../js/d3.min.js"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+			d3.json('SUV销售数据.json')
+					.then(function (dataset) {
+						var width = 1200;
+						var height = 600;
+						var svg = d3.select("body").append("svg")
+								.attr("width", width)
+								.attr("height", height);
+						var padding = {
+							top: 50,
+							right: 50,
+							bottom: 50,
+							left: 50
+						}; //外边框
+						//计算salesVolume的最大值
+						var salemax = 0;
+						for(var i = 0; i < dataset.length; i++) {
+							var currsale = d3.max(dataset[i].salesVolume, function(d) {
+								return d[1];
+							})
+							if(currsale > salemax) {
+								salemax = currsale;
+							}
+						}
+						console.log(salemax)
+						var xScale = d3.scaleTime()
+								.domain([new Date(2016,0),new Date(2017,11)])
+								.range([0,width - padding.left - padding.right])
+								// .domain([201601,201602,201603,201604,201605,201606,201607,201608,201609,201610,201611,201612,
+								// 	     201701,201702,201703,201704,201705,201706,201707,201708,201709,201710,201711,201712])
+								// .range([0, 45, 90, 135, 180, 225, 270, 315, 360, 405, 450, 495, 540, 585, 630, 675, 720, 765, 810, 855, 900, 945, 990, 1035, 1080]);
+						var yScale = d3.scaleLinear()
+								.domain([0, salemax * 1.1])
+								.range([height - padding.top - padding.bottom, 0])
+
+						//创建一个直线生成器
+						var linePath = d3.line()
+								.x(function(d) {
+									//console.log(new Date(d[0]/100,d[0]%100));
+									return xScale(new Date(d[0]/100,d[0]%100-1))
+								})
+								.y(function(d) {
+									return yScale(d[1])
+								}).curve(d3.curveBasis)
+						//定义两个颜色（蓝色，绿色）
+						var colors = [d3.rgb(0, 0, 255), d3.rgb(0, 255, 0), d3.rgb(255, 255, 0), d3.rgb(255, 0, 0), d3.rgb(0, 255, 255)];
+						//添加路径
+						//console.log(dataset[0].gdp)
+						svg.selectAll("path")
+								.data(dataset)
+								.enter()
+								.append("path")
+								.attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+								.attr("d", function(d) {return linePath(d.salesVolume)})
+								.attr("fill", "none")
+								.attr("stroke-width", 3)
+								.attr("stroke", function(d, i) {
+									return colors[i]
+								})
+						//x轴
+						//var xAxis = d3.svg.axis().scale(xScale).ticks(5).orient("bottom");
+
+						//y轴
+						//var yAxis = d3.svg.axis().scale(yScale).orient("left");
+						var xAxis = d3.axisBottom(xScale)	//指定x坐标轴和比例尺
+								.ticks(24);			//指定刻度的数量
+						var yAxis = d3.axisLeft(yScale)	//指定y坐标轴和比例尺
+								.ticks(8);			//指定刻度的数量
+						svg.append("g")
+								.attr("class", "axis")
+								.attr("transform", "translate(" + padding.left + "," + (height - padding.bottom) + ")")
+								.call(xAxis);
+						svg.append("g")
+								.attr("class", "axis")
+								.attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+								.call(yAxis);
+
+						//添加矩形图例和文字
+						svg.selectAll("rect")
+								.data(dataset)
+								.enter()
+								.append("rect") //添加矩形
+								.attr("width", 20)
+								.attr("height", 15)
+								.attr("fill", function(d, i) {
+									return colors[i]
+								})
+								.attr('x', function(d, i) {
+									return padding.left + 80 * i;
+								})
+								.attr("y", height - padding.bottom)
+								.attr("transform", "translate(20,30)");
+						//添加标签文字
+						svg.selectAll(".text")
+								.data(dataset)
+								.enter()
+								.append("text") //添加矩形边上的文字
+								.attr("font-size", "14px")
+								.attr("text-anchor", "middle")
+								.attr("fill", "#000")
+								.attr('x', function(d, i) {
+									return padding.left + 80 * i;
+								})
+								.attr("dx", "40px")
+								.attr("dy", "0.9em")
+								.attr("y", height - padding.bottom)
+								.attr("transform", "translate(20,30)")
+								.text(function(d) { //哪个国家的信息
+									return d.province;
+								})
+					}).catch(error => console.log(error))
+		</script>
+	</body>
+</html>

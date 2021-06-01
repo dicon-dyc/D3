@@ -1,0 +1,114 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三次实验第二题</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js"></script>
+</head>
+
+<body>
+    <script>
+        const width = 960,
+            height = 640;
+        let svg = d3.select('body')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+
+        let margin = {
+            top: 30,
+            right: 50,
+            bottom: 30,
+            left: 50
+        }
+        d3.json('./scatter.json')
+            .then(function (data) {
+                data = data.map(item => {
+                    return {
+                        label: item.year,
+                        data: item.data.map(item => {
+                            return {
+                                x: +item[0],
+                                y: +item[1]
+                            }
+                        })
+                    }
+                });
+                let Points = []
+                data.forEach(item => {
+                    item.data.forEach(item => {
+                        Points.push({
+                            x: item.x,
+                            y: item.y
+                        })
+                    })
+                });
+                let x = d3.scaleLinear()
+                    .domain(d3.extent(Points.map(item => item.x))).nice()
+                    .range([margin.left, width - margin.right])
+                svg.append('g')
+                    .call(g => g.attr('name', 'xAxis').attr('transform',
+                        `translate(${0}, ${height - margin.bottom})`))
+                    .call(d3.axisBottom(x).tickSizeOuter(0).tickSizeInner(10))
+                    .call(g => g
+                        .selectAll(".tick line")
+                        .attr('y2', -(height - margin.top - margin.bottom))
+                        .attr('opacity', 0.1)
+                    )
+                let y = d3.scaleLinear()
+                    .domain(d3.extent(Points.map(item => item.y))).nice()
+                    .range([height - margin.bottom, margin.top])
+                svg.append('g')
+                    .call(g => g.attr('name', 'yAxis').attr('transform', `translate(${margin.left}, ${0})`))
+                    .call(d3.axisLeft(y).tickSizeOuter(0).tickSizeInner(10))
+                    .call(g => g
+                        .selectAll(".tick line")
+                        .attr('x2', width - margin.right - margin.left)
+                        .attr('opacity', 0.1)
+                    )
+                let colors = ['#c06f98', '#2c9678', '#2376b7']
+                svg.append('g')
+                    .call(g => g.attr('name', 'scatterPoint'))
+                    .selectAll('g')
+                    .data(data)
+                    .join('g')
+                    .call(g => g.attr('name', element => element.label))
+                    .call(g => g
+                        .selectAll('circle')
+                        .data(element => element.data)
+                        .join('circle')
+                        .attr('cx', element => x(element.x))
+                        .attr('cy', element => y(element.y))
+                        .attr('r', 20)
+                    )
+                    .call(g => g
+                        .attr('fill', (element, index) => colors[index])
+                        .attr('fill-opacity', 0.5)
+                    )
+                    .call(g => g
+                        .append('rect')
+                        .attr('x', width - margin.right + 10)
+                        .attr('y', (element, index) => index * 30 + margin.top)
+                        .attr('width', 25)
+                        .attr('height', 25)
+                    )
+                    .call(g => g
+                        .on("mouseover", function () {
+                            d3.select(this)
+                                .attr("fill-opacity", 1)
+                        })
+                        .on("mouseout", function () {
+                            d3.select(this)
+                                .transition()
+                                .duration(500)
+                                .attr("fill-opacity", 0.5);
+                        })
+                    )
+                console.log(Points, data)
+            }).catch(error => console.log(error))
+    </script>
+</body>
+
+</html>

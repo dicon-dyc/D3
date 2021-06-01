@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js" charset="utf-8"></script>
+<script>
+    var width = 800; //SVG绘制区域的宽度
+    var height = 800; //SVG绘制区域的高度
+    var xAxisWidth = 600; //x轴宽度
+    var yAxisWidth = 600; //y轴宽度
+    //外边框
+    var padding = {
+        top: 30,
+        right: 30,
+        bottom: 30,
+        left: 30
+    };
+    var svg = d3.select("body") //选择<body>
+        .append("svg") //在<body>中添加<svg>
+        .attr("width", width) //设定<svg>的宽度属性
+        .attr("height", height); //设定<svg>的高度属性
+
+
+
+    var rand = Array.from({length: 100}, d3.randomInt(0,100))
+
+    console.log(rand);
+
+    var bins = d3.bin() //直方图布局
+        .thresholds(50)(rand)
+
+    console.log(bins)
+    //比例尺
+    var xScale = d3.scaleLinear()
+        .domain([bins[0].x0, bins[bins.length - 1].x1])
+        .range([padding.left, width - padding.right])
+    var yScale = d3.scaleLinear()
+        .domain([0, d3.max(bins, d => d.length)]).nice()//nice取整
+        .range([height - padding.bottom, padding.top])
+
+    //添加矩形
+    svg.append("g")
+        .attr("fill",  "steelblue")
+        .selectAll("rect")
+        .data(bins)
+        .join("rect")
+        .attr("x", d => xScale(d.x0) + 1)
+        .attr("width", d => Math.max(0, xScale(d.x1) - xScale(d.x0) - 1))
+        .attr("y", d => yScale(d.length))
+        .attr("height", d => yScale(0) - yScale(d.length));
+
+    //添加坐标轴
+    var xAxis = d3.axisBottom(xScale)	//指定x坐标轴和比例尺
+        .ticks(width / 40);				//指定刻度的数量
+
+    var yAxis = d3.axisLeft(yScale)	//指定y坐标轴和比例尺
+        .ticks(height/40);			//指定刻度的数量
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + 0+ "," + (height - padding.bottom+1) + ")")
+        .call(xAxis);
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding.left + "," + 0 + ")")
+        .call(yAxis);
+
+</script>
+</body>
+</html>

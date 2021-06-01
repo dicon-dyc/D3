@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js"></script>
+<script>
+    var width = 1000,
+        height = 600,
+        radius=height/2;
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+    //.append("g");
+
+    d3.json("实验四-2.json").then(function(data) {
+
+        var dataset = d3.hierarchy(data)
+            .count() //进行层次布局之前必须调用 node.sum 或 node.count，因为布局需要 node.value 属性
+        //.sum(function(d) { return d.value})
+        //.sort((a, b) =>  {return b.height - a.height })
+        //console.log(dataset);
+
+        var partition = d3.partition()//定义圆形分区布局
+            .size([2 * Math.PI, radius])
+
+
+        var root = partition(dataset)//用层次数据和圆形分区布局生成分区数据信息
+        console.log(root);
+
+        //var color = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        //弧生成器
+        var arc = d3.arc()
+            .startAngle(d => d.x0)
+            .endAngle(d => d.x1)
+            .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+            .padRadius(radius / 2)
+            .innerRadius(d => d.y0)
+            .outerRadius(d => d.y1 - 1)
+        //绑定数据 添加g
+        var arcs=svg.selectAll("g")
+            .data(root.descendants())
+            .enter()
+            .append("g")
+            .attr("transform", "translate(" + radius + "," + radius + ")")
+        //添加扇形
+        arcs.append("path")
+            .attr("fill", d => {
+                while (d.depth > 1) d = d.parent;
+                return color(d.data.name); })
+            .attr("fill-opacity", d=>{return (d.depth==0)?0:0.6})
+            .attr("d", d=>arc(d))
+            .on("mouseover", function(d) {
+                d3.select(this)
+                    .style("fill", "yellow");
+            })
+            .on("mouseout", function(d) {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style("fill", (d) => {
+                        if(!d.depth) return "#ccc";
+                        while(d.depth > 1) d = d.parent;
+                        return color(d.data.name);
+                    })
+                    .style("fill-opacity", d=>{return (d.depth==0)?0:0.6})
+            })
+        //添加文本
+        arcs.append("text")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .attr("font-size", 10)
+            .attr("font-family", "sans-serif")
+            .attr("transform", function(d,i) {
+                const x = (d.x0 + d.x1) / 2 * 180 /Math.PI;
+                const y = (d.y0 + d.y1)/2;
+                if(i == 0)
+                {return " translate("+0+","+0+")";}
+                else
+                {return "rotate("+(x-90)+")" +" translate("+y+","+0+")"+" rotate("+(x < 180 ? 0 : 180)+")";}
+            })
+            .text(d => d.data.name)
+
+
+    });
+</script>
+</body>
+</html>

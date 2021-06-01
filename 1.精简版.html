@@ -1,0 +1,140 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三次实验第一题</title>
+    <script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js"></script>
+</head>
+
+<body>
+    <script>
+        const width = 960,
+            height = 640;
+        let svg = d3.select('body')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+
+        let margin = {
+            top: 30,
+            right: 50,
+            bottom: 30,
+            left: 50
+        }
+
+        d3.json('./line.json')
+            .then(function (data) {
+                console.log(data)
+                data = data.map(element => {
+                    return {
+                        label: element.country,
+                        data: element.gdp.map(element => {
+                            return {
+                                x: +element[0],
+                                y: +element[1]
+                            }
+                        })
+                    }
+                });
+
+                let x = d3.scaleLinear()
+                    .domain([2000, 2013])
+                    .nice()
+                    .range([margin.left, width - margin.right])
+
+
+                let xAxis = d3.axisBottom()
+                    .scale(x)
+                    .ticks(14)
+                    .tickSizeOuter(0)
+                svg.append('g')
+                    .call(g => g.attr('name', 'xAxis'))
+                    .call(xAxis)
+                    .attr("transform", `translate(${0}, ${height - margin.bottom})`)
+                    .call(g => g
+                        .selectAll('.tick line')
+                        .attr('y2', -(height - margin.bottom))
+                        .attr('opacity', 0.1)
+                    )
+                let yData = []
+                data.forEach(element => {
+                    element.data.forEach(item =>
+                        yData.push(item.y)
+                    )
+                });
+                let y = d3.scaleLinear()
+                    .domain(d3.extent(yData))
+                    .range([height - margin.bottom, margin.top])
+                    .nice()
+                let yAxis = d3.axisLeft()
+                    .scale(y)
+                    .tickSizeOuter(0)
+                svg.append('g')
+                    .call(g => g.attr('name', 'yAxis'))
+                    .call(yAxis)
+                    .attr("transform", `translate(${margin.left}, ${0})`)
+                    .selectAll('.tick line')
+                    .attr('x2', width - margin.right)
+                    .attr('opacity', 0.1)
+                let colors = ['#c06f98', '#2376b7', '#2c9678']
+                let line = d3.line()
+                    .curve(d3.curveCatmullRom)
+                    .x(item => x(item.x))
+                    .y(item => y(item.y))
+
+                function length(path) {
+                    return d3.create("svg:path").attr("d", path).node().getTotalLength();
+                }
+                let l = length(line(data[0].data))
+                console.log(l)
+                svg.append('g')
+                    .call(g => g.attr('name', 'path'))
+                    .selectAll('path')
+                    .data(data)
+                    .join('path')
+                    .attr("stroke-width", 2.5)
+                    .attr('fill', 'none')
+                    .attr('stroke', (item, index) => colors[index])
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .call(g => g.attr("stroke-dasharray", item => `0,${length(line(item.data))}`)
+                        .attr('d', item => line(item.data))
+                        .transition()
+                        .duration(5000)
+                        .ease(d3.easeLinear)
+                        .attr("stroke-dasharray", item => `${length(line(item.data))},${length(line(item.data))}`)
+                    )
+                // text and circle
+                svg.append('g')
+                    .call(g => g.attr('name', 'text-circle'))
+                    .selectAll('g')
+                    .data(data)
+                    .join('g')
+                    .attr('name', item => item.label)
+                    .call(g => g
+                        .selectAll('text')
+                        .data(item => item.data)
+                        .join('text')
+                        .attr('name', (element, index) => index + 1)
+                        .attr('x', element => x(element.x))
+                        .attr('y', element => y(element.y))
+                        .text(element => element.y)
+                    )
+                    .call(g => g
+                        .selectAll('circle')
+                        .data(item => item.data)
+                        .join('circle')
+                        .attr("cx", element => x(element.x))
+                        .attr("cy", element => y(element.y))
+                        .attr("r", 3)
+                        .attr("stroke", "black")
+                        .attr("stroke-width", 1)
+                        .attr("fill", "white")
+                    )
+            }).catch(error => console.log(error))
+    </script>
+</body>
+
+</html>

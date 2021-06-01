@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js" charset="utf-8"></script>
+<script>
+
+    var width = 800; //SVG绘制区域的宽度
+    var height = 800; //SVG绘制区域的高度
+    var xAxisWidth = 400; //x轴宽度
+    var yAxisWidth = 300; //y轴宽度
+    //外边框
+    var padding = {
+        top: 50,
+        right:10,
+        bottom: 20,
+        left: 40
+    };
+    var svg = d3.select("body") //选择<body>
+        .append("svg") //在<body>中添加<svg>
+        .attr("width", width) //设定<svg>的宽度属性
+        .attr("height", height); //设定<svg>的高度属性
+
+    data = [
+        {year: 2016, 杭州: 3840, 宁波: 1920, 温州: 960, 绍兴: 840},
+        {year: 2017, 杭州: 1600, 宁波: 1440, 温州: 960, 绍兴: 540},
+        {year: 2018, 杭州: 1640, 宁波:  960, 温州: 640, 绍兴: 620},
+        {year: 2018, 杭州: 1320, 宁波:  480, 温州: 640, 绍兴: 750}];
+
+    //获得关键词
+    var mykey=Object.keys(data[0]).slice(1)
+    //console.log(mykey)
+    //堆栈布局
+    var stack = d3.stack()
+        .keys(mykey)
+
+    var series = stack(data);
+
+    console.log(series)
+
+    //console.log(data.map(d => d.year))
+    //缎带比例尺
+    xScale = d3.scaleBand()
+        .domain(data.map(d => d.year))
+        .rangeRound([padding.left, width - padding.right])
+        .padding(0.2)
+
+    console.log(xScale.bandwidth())
+
+    //线性比例尺
+    yScale = d3.scaleLinear()
+        .domain([0, d3.max(series, d => d3.max(d, d => d[1]))])
+        .rangeRound([height - padding.bottom, padding.top])
+
+    //颜色比例尺
+    color = d3.scaleOrdinal()
+        .domain(series.map(d => d.key))
+        .range(d3.schemeSpectral[series.length])
+        .unknown("#ccc")
+
+    //添加坐标轴
+    var xAxis = d3.axisBottom(xScale)	//指定x坐标轴和比例尺
+        .ticks(height/50);
+
+
+    var yAxis = d3.axisLeft(yScale)	//指定y坐标轴和比例尺
+        .ticks(height/50)			//指定刻度的数量
+        .tickSizeOuter(0);
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + 0+ "," + (height - padding.bottom) + ")")
+        .call(xAxis);
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding.left + "," + 0 + ")")
+        .call(yAxis);
+
+    //添加矩形
+    var rects = svg.append("g")
+        .selectAll("g")
+        .data(series)
+        .join("g")
+        .attr("fill", d => color(d.key))
+
+    rects.selectAll("rect")
+        .data(d => d)
+        .join("rect")
+        .attr("x", (d, i) => xScale(d.data.year))
+        .attr("y", d => yScale(d[1]))
+        .attr("height", d => yScale(d[0]) - yScale(d[1]))
+        .attr("width", xScale.bandwidth())
+
+    //添加图例文本
+    var labHeight=50
+    var labRadius=10
+
+    rects.append("circle")
+        .attr("cx",d=>{return width-padding.right*10})
+        .attr("cy",(d,i)=>{return padding.top*2+labHeight*i})
+        .attr("r",labRadius)
+    rects.append("text")
+        .attr("x",d=>{return width-padding.right*8})
+        .attr("y",(d,i)=>{return padding.top*2+labHeight*i})
+        .attr("dy",labRadius/2)
+        .text(d=>d.key)
+
+</script>
+</body>
+</html>

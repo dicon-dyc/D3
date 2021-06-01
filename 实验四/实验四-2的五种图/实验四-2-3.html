@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/d3@6.5.0/dist/d3.min.js"></script>
+<script>
+    var width = 800;
+    var	height = 800;
+    //画布周边的空白
+    var padding = {
+        left: 30,
+        right: 30,
+        top: 20,
+        bottom: 20}
+
+    var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+
+
+    d3.json("实验四-2.json").then(function(data) {
+
+        var dataset=d3.hierarchy(data)//对数据进行层次布局生成根结点
+            .count()//进行层次布局之前必须调用 node.sum 或 node.count，因为布局需要 node.value 属性
+
+        var myTree=d3.tree() //定义树状布局
+            .size([width-200,height-200])
+
+        var root =myTree(dataset)//用层次数据和树状布局生成树状数据信息
+
+        console.log(root) ;
+        console.log(root.links()) ;
+
+        //绘制结点间的连接线
+        svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .attr("transform", "translate(" + padding.left + "," +  padding.top + ")")
+            .selectAll("path")
+            .data(root.links())
+            .join("path")
+            .attr("d",  d3.linkHorizontal()
+                .x(d => d.y)
+                .y(d => d.x));
+        //添加结点和文本
+        var node = svg.append("g")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .selectAll("g")
+            .data(root.descendants())
+            .join("g")
+            .attr("transform",  "translate(" + padding.left + "," +  padding.top  + ")");
+        //添加点
+        node.append("circle")
+            .attr("cx", d => d.y)
+            .attr("cy", d => d.x)
+            .attr("fill", d => d.children ? "black" : "blue")
+            .attr("r", 2.5);
+        //添加文本
+        node.append("text")
+            .attr("x", d => d.y)
+            .attr("y", d => d.x)
+            .attr("dy",d => d.children ? -6 :6)
+            .attr("dx", d => d.children ? -10 : 6)
+            .text(d => d.data.name)
+
+    });
+</script>
+</body>
+</html>

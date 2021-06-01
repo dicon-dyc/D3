@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<script src="http://d3js.org/d3.v6.min.js" charset="utf-8"></script>  
+		<script>
+		var width = 500;
+		var height = 500;
+		var dataset = [ 30 , 10 , 43 , 55 , 13 ];
+		var svg = d3.select("body").append("svg")
+							.attr("width",width)
+							.attr("height",height);
+		var pie = d3.pie();
+		var outerRadius = width / 4;
+		var innerRadius = width / 8;
+		var arc = d3.arc()
+					.innerRadius(innerRadius)
+					.outerRadius(outerRadius);
+					
+		 var color = d3.scaleOrdinal(d3.schemeCategory10);
+		 //定义拖拽行为  
+		var mydrag = d3.drag()
+					 .on("drag", dragmove);
+		//响应函数
+		function dragmove(event,d) {
+			d.dx += event.dx;
+			d.dy += event.dy;
+			d3.select(this)
+				.attr("transform","translate("+d.dx+","+d.dy+")");
+		}			 
+					 
+		//绑定数据并调用拖拽行为			
+		var gAll = svg.append("g")
+				  .attr("transform","translate("+outerRadius+","+outerRadius+")");
+		var arcs = gAll.selectAll(".arcs_g")
+					  .data(pie(dataset))
+					  .enter()
+					  .append("g")
+					  .each(function(d){//为每一个区域添加变量，保持偏移量
+							d.dx = 0;
+							d.dy = 0;
+					  })
+					  .call(mydrag);
+		console.log(dataset);			  
+					  
+		//绘制弧并添加文本			  
+		arcs.append("path")
+			.attr("fill",function(d,i){
+				return color(i);
+			})
+			.attr("d",function(d){
+				return arc(d);
+			});
+		arcs.append("text")
+			.attr("transform",function(d){
+				return "translate(" + arc.centroid(d) + ")";
+			})
+			.attr("text-anchor","middle")
+			.text(function(d){
+				return d.value;
+			});
+		console.log(dataset);
+		console.log(pie(dataset));
+		
+		</script>  
+	</body>
+</html>
